@@ -26,6 +26,7 @@ volatile int interrupted = 0;
 
 // The param of this function is the send signal.
 void interruptHandler(int signum){
+    (void) (signum);
     interrupted = 1;
 }
 

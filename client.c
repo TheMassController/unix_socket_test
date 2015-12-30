@@ -34,7 +34,7 @@ int main(){
         if (readlen < 0){
             printf("Failed to read from the socket. Code: %d (%s)\n", errno, strerror(errno));
         } else {
-            printf("Message received: %s (readlen: %d)\n", buffer, readlen);
+            printf("Message received: %s (readlen: %zd)\n", buffer, readlen);
         }
         bzero(buffer, MAX_MESSAGE_SIZE);
     }
