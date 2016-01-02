@@ -1,3 +1,10 @@
+/* General idea:
+ * A socket normally only exists as a piece of memory mapped to a process.
+ * You can bind a socket to a file and, depending on the properties of the file, the socket is now publicly available.
+ * By marking the socket as a listen socket. This makes it a passive socket, processes can connect to this socket and if the connection is accepted a new socket is spawned
+ * Using this new socket the client and server can now talk. Talking happens trough ports, the same ports as TCP and UDP use.
+ * When binding a socket to a file, it is still just a port. Its just that the port is random from the perspective of client and server, while a file name does not have to be.
+ */
 #include <stdio.h>                  // Printf
 #include <errno.h>                  // Error code translation, errno
 #include <string.h>                 // strerr
@@ -7,15 +14,8 @@
 #include <sys/un.h>                 // UNIX domain sockets defenitions
 #include <signal.h>                 // To catch signals passed to this process
 
-/* General idea:
- * A socket normally only exists as a piece of memory mapped to a process.
- * You can bind a socket to a file and, depending on the properties of the file, the socket is now publicly available.
- * By marking the socket as a listen socket. This makes it a passive socket, processes can connect to this socket and if the connection is accepted a new socket is spawned
- * Using this new socket the client and server can now talk. Talking happens trough ports, the same ports as TCP and UDP use.
- * When binding a socket to a file, it is still just a port. Its just that the port is random from the perspective of client and server, while a file name does not have to be.
- */
-
 #include "socket_server.h"
+#include "socket_distributor.h"
 /* MAXCONNCOUNT only talks about the amount of backlog: the amount of connections that can be waiting to be accepted at the same time.
  * Multiple can still be accepted, but only if they start waiting after the last one was accepted
  * Its only a hint, by the way. So an implimentation can still allow a bigger or a smaller buffer then specified here.
