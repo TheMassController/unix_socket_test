@@ -4,8 +4,8 @@ CFILES=$(wildcard $(SRCDIR)*.c)
 INC=
 LIB=
 LIBDIR= -L lib/
-LDFLAGS=
-CFLAGS=-Wall -Wextra -Werror -std=gnu11
+LDFLAGS= -pthread
+CFLAGS=-Wall -Wextra -Werror -std=gnu11 -pthread
 ODIR=obj/
 
 .PHONY: all clean debug
@@ -16,8 +16,8 @@ all: LDFLAGS +=
 all: server
 all: client
 
-debug: CFLAGS +=-DDEBUG -g
-debug: LDFLAGS +=-g
+debug: CFLAGS +=-DDEBUG -ggdb -Og
+debug: LDFLAGS +=
 debug: pre-build $(TARGET)
 
 $(ODIR)%.o: $(SRCDIR)%.c
