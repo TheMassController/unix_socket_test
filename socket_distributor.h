@@ -1,15 +1,22 @@
 /**
+ * @file socket_distributor.h
+ * @author Jacko Dirks
+ *
+ * The idea of this module is that is has a number of sockets and it forwards every message you give it to every socket.
+ */
+
+/**
  * @brief Initializes and starts the socket distributor. Run this function from a pthread.
  * @param maxThreadCount The maximum amount of threads that will be served by this socket
  */
-void socket_distributor_main(unsigned maxThreadCount);
+void socketDistributorMain(size_t maxSocketCount, size_t buflen);
 
 /**
  * @brief signals the distributor to stop.
  *
  * This will stop the thread and return once it is done.
  */
-void stop_distributor(void);
+void stopDistributor(void);
 
 /**
  * @brief add a socket to the socket distributor
@@ -24,3 +31,10 @@ int addSocket(int acc_con);
  * Returns immediately if there was space anyway, makes the callee thread sleep if there was no space, while waiting for space.
  */
 void waitForSocketSpace(void);
+
+/**
+ * @brief Forwards string to all connected clients
+ * @param mes This message is copied to he internal buffer before returning. It is truncated if it passed given buflen
+ * @return 0 if erverything was ok. See errno for non-0 return code
+ */
+int distributeMessageToSockets(char* mes);
