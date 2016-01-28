@@ -5,7 +5,7 @@ INC=
 LIB=
 LIBDIR= -L lib/
 LDFLAGS= -pthread
-CFLAGS=-Wall -Wextra -Werror -std=gnu11 -pthread
+CFLAGS=-Wall -Wextra -Werror -Wshadow -Wfatal-errors -std=gnu11 -pthread
 ODIR=obj/
 
 .PHONY: all clean debug
