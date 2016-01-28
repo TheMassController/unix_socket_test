@@ -84,11 +84,11 @@ int main(){
         printf("Sending message %d\n", i);
         sleep(1);
     }
-    if (close(sockfd) == -1){
+    if (close(acc_con) == -1){
         printf("Shutting down the socket failed. Code: %d (%s).\n", errno, strerror(errno));
         return -1;
     }
-    if (close(acc_con) == -1){
+    if (close(sockfd) == -1){
         printf("Shutting down the socket failed. Code: %d (%s).\n", errno, strerror(errno));
         return -1;
     }
