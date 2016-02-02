@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "socket_distributor.h"
 
@@ -16,8 +17,23 @@ static char* buffer;
 static size_t strBufLen;
 static size_t socketListLen;
 static size_t socketListCursor = 0;
+static volatile int interrupted = 0;
+
+static void interruptHandler(int signum){
+    (void) (signum);
+    interrupted = 1;
+}
 
 static int init(size_t maxSocketCount, size_t buflen){
+    // Create a seperate handler for sigint, this signal will be send to all threads when the process wants to quit
+    struct sigaction intAction;
+    intAction.sa_handler = interruptHandler;
+    // See man sigemptyset
+    sigemptyset(&intAction.sa_mask);
+    intAction.sa_flags = 0;
+    sigaction(SIGINT, &intAction, NULL);
+    sigaction(SIGTERM, &intAction, NULL);
+    // Setup the internal variables
     strBufLen = buflen;
     socketListLen = maxSocketCount;
     buffer = malloc(buflen*sizeof(char));
@@ -48,35 +64,42 @@ static int init(size_t maxSocketCount, size_t buflen){
         printf("Failed to initialize mutex. Errorcode: %d (%s)\n", retCode, strerror(retCode));
         return 1;
     }
-    if (sem_init(&signaller, 0, -1) == -1){
+    if (sem_init(&signaller, 0, 0) == -1){
         printf("Failed to initialize semaphore. Errorcode: %d (%s)\n", errno, strerror(errno));
         return 1;
     }
-    if (sem_init(&socketListSemaphore, 0, maxSocketCount - 1) == -1){
+    if (sem_init(&socketListSemaphore, 0, maxSocketCount) == -1){
         printf("Failed to initialize semaphore. Errorcode: %d (%s)\n", errno, strerror(errno));
         return 1;
     }
     return 0;
 }
 
-void socketDistributorMain(size_t maxSocketCount, size_t buflen){
-    if (init(maxSocketCount, buflen) != 0){
+void socketDistributorMain(void* socketParamSet){
+    struct SocketParamSet* param = (struct SocketParamSet*) socketParamSet;
+    if (init(param->maxConnCount, param->buflen) != 0){
+        // Something went wrong
+        sem_post(&param->errorNotifier);
+        sem_post(&param->initCompleteNotifier);
         pthread_exit((void*)1);
     }
-    while(1){
+    sem_post(&param->initCompleteNotifier);
+    while(!interrupted){
         sem_wait(&signaller);
         pthread_mutex_lock(&strBufMutex);
         pthread_mutex_lock(&socketMutex);
         for (size_t i = 0; i < socketListCursor; ++i){
             int acc_con = socketList[i];
             ssize_t writelen = write(acc_con, buffer, strlen(buffer));
-            if (writelen == -1){
+            if (writelen == -1 && errno == EPIPE){
                 // The socket is dead, remove it from the list
                 // Move all other elements one step forward
                 memmove(&socketList[socketListCursor-2], &socketList[socketListCursor-1], (socketListCursor - i)*sizeof(int));
                 // There is now one more free space
                 socketListCursor--;
                 sem_post(&socketListSemaphore);
+            } else {
+                printf("Error while processing pipes: %d (%s)", errno, strerror(errno));
             }
         }
         pthread_mutex_unlock(&socketMutex);

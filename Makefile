@@ -18,7 +18,9 @@ all: client
 
 debug: CFLAGS +=-DDEBUG -ggdb -Og
 debug: LDFLAGS +=
-debug: pre-build $(TARGET)
+debug: pre-build 
+debug: server
+debug: client
 
 $(ODIR)%.o: $(SRCDIR)%.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -26,7 +28,7 @@ $(ODIR)%.o: $(SRCDIR)%.c
 pre-build:
 	@mkdir -p $(ODIR)
 
-server: $(ODIR)server.o $(ODIR)socket_distributor.o
+server: $(ODIR)server_listener.o $(ODIR)socket_distributor.o $(ODIR)server_main.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 client: $(ODIR)client.o

@@ -7,7 +7,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "socket_server.h"
+#define SOCKET_LOCATION "/tmp/socket_test"
+#define MAX_MESSAGE_SIZE 128
 
 int main(){
     int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);

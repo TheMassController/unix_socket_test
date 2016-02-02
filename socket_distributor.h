@@ -1,3 +1,4 @@
+#include <semaphore.h>
 /**
  * @file socket_distributor.h
  * @author Jacko Dirks
@@ -5,11 +6,21 @@
  * The idea of this module is that is has a number of sockets and it forwards every message you give it to every socket.
  */
 
+struct SocketParamSet {
+    size_t maxConnCount;
+    size_t buflen;
+    char* socketLocation;
+    sem_t initCompleteNotifier;
+    sem_t errorNotifier;
+};
+
 /**
  * @brief Initializes and starts the socket distributor. Run this function from a pthread.
  * @param maxThreadCount The maximum amount of threads that will be served by this socket
+ * @param buflen The length of the internal string buffer.
+ * @param initCompleteNotifier This semaphore MUST be initialized, it will be set once this thread has completed initialization
  */
-void socketDistributorMain(size_t maxSocketCount, size_t buflen);
+void socketDistributorMain(void* socketDistributorMainParam);
 
 /**
  * @brief signals the distributor to stop.
@@ -34,7 +45,7 @@ void waitForSocketSpace(void);
 
 /**
  * @brief Forwards string to all connected clients
- * @param mes This message is copied to he internal buffer before returning. It is truncated if it passed given buflen
+ * @param mes This message is copied to he internal buffer before returning. It is truncated if it passed given buflen (passed to the main)
  * @return 0 if erverything was ok. See errno for non-0 return code
  */
 int distributeMessageToSockets(char* mes);
