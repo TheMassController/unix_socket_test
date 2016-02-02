@@ -20,10 +20,10 @@
 
 static volatile int interrupted = 0;
 // The param of this function is the send signal.
-static void interruptHandler(int signum){
-    (void) (signum);
-    interrupted = 1;
-}
+//static void interruptHandler(int signum){
+//    (void) (signum);
+//    interrupted = 1;
+//}
 
 static void errorExitProcedure(sem_t initCompleteNotifier, sem_t errorNotifier){
     sem_post(&errorNotifier);
@@ -66,16 +66,16 @@ static int closeSocket(char* socket_file, int sockfd){
 }
 
 /* The server side creates the socket */
-void listenSocketServer(void* socketParamSet){
+void* listenSocketServer(void* socketParamSet){
     struct SocketParamSet* param = (struct SocketParamSet*) socketParamSet;
     // Create a seperate handler for sigint, this signal will be send to all threads when the process wants to quit
-    struct sigaction intAction;
-    intAction.sa_handler = interruptHandler;
-    // See man sigemptyset
-    sigemptyset(&intAction.sa_mask);
-    intAction.sa_flags = 0;
-    sigaction(SIGINT, &intAction, NULL);
-    sigaction(SIGTERM, &intAction, NULL);
+    //struct sigaction intAction;
+    //intAction.sa_handler = interruptHandler;
+    //// See man sigemptyset
+    //sigemptyset(&intAction.sa_mask);
+    //intAction.sa_flags = 0;
+    //sigaction(SIGINT, &intAction, NULL);
+    //sigaction(SIGTERM, &intAction, NULL);
 
     // This piece of code tries if the socket already exists and removes it if it does. ENOENT means that the socket did not exist, we can ignore that error.
     if (unlink(param->socketLocation) == -1){
@@ -119,9 +119,13 @@ void listenSocketServer(void* socketParamSet){
                 errorExitProcedure(param->initCompleteNotifier, param->errorNotifier);
             }
             waitForSocketSpace();
-            addSocket(acc_con);
             sockfd = openSocket(param->socketLocation, param->maxConnCount);
         }
     }
     closeSocket(param->socketLocation, sockfd);
+    return NULL;
+}
+
+void stopSocketListener(void){
+    interrupted = 1;
 }

@@ -20,7 +20,7 @@ struct SocketParamSet {
  * @param buflen The length of the internal string buffer.
  * @param initCompleteNotifier This semaphore MUST be initialized, it will be set once this thread has completed initialization
  */
-void socketDistributorMain(void* socketDistributorMainParam);
+void* socketDistributorMain(void* socketDistributorMainParam);
 
 /**
  * @brief signals the distributor to stop.
@@ -49,3 +49,5 @@ void waitForSocketSpace(void);
  * @return 0 if erverything was ok. See errno for non-0 return code
  */
 int distributeMessageToSockets(char* mes);
+
+void stopSocketDistributor(void);

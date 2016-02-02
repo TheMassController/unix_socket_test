@@ -3,5 +3,6 @@
  * @author Jacko Dirks
  */
 
+void* listenSocketServer(void* socketParamSet);
 
-void listenSocketServer(void* socketParamSet);
+void stopSocketListener(void);
