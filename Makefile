@@ -11,7 +11,7 @@ ODIR=obj/
 .PHONY: all clean debug
 
 all: pre-build
-all: CFLAGS += -O2
+all: CFLAGS += -O3
 all: LDFLAGS +=
 all: server
 all: client
