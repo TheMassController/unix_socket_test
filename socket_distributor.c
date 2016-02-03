@@ -80,7 +80,7 @@ void* socketDistributorMain(void* socketParamSet){
                 if (errno == EPIPE){
                     // The socket is dead, remove it from the list
                     // Move all other elements one step forward
-                    memmove(&socketList[socketListCursor-2], &socketList[socketListCursor-1], (socketListCursor - i)*sizeof(int));
+                    memmove(&socketList[i], &socketList[i+1], (socketListCursor - i - 1)*sizeof(int));
                     // There is now one more free space
                     socketListCursor--;
                     sem_post(&socketListSemaphore);
