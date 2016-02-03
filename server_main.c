@@ -14,7 +14,7 @@ static volatile int interrupted = 0;
 static struct SocketParamSet params;
 // Semi-hard defined, for now
 static size_t bufSize = 128;
-static size_t maxClientCount = 3;
+static size_t maxClientCount = 6;
 static char* socketFileName = "/tmp/socket_test";
 
 static void interruptHandler(int signum){
